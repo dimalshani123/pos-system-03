@@ -1,20 +1,29 @@
-// controller/OrderController.js
+// orderController.js
 
-import Order from '../model/Order.js';
-import { getItems } from './ItemController.js';
+import { addOrder, deleteOrder, getOrders } from './orderModel.js';
+import { loadOrderList, updateCounts } from './utils.js'; // Import utilities for UI updates
 
-export const placeOrder = (customerId, itemId, availableQty, qty) => {
-    const item = getItems().find(item => item.id === itemId);
-    if (!item) {
-        throw new Error('Item not found');
+export function placeOrderHandler(event) {
+    event.preventDefault();
+    const orderCustomerId = document.getElementById('orderCustomerId').value;
+    const orderItemId = parseInt(document.getElementById('orderItemId').value);
+    const orderAvailableQty = parseInt(document.getElementById('orderAvailableQty').value);
+    const orderQty = parseInt(document.getElementById('orderQty').value);
+
+    if (orderQty > orderAvailableQty) {
+        alert('Insufficient quantity available!');
+        return;
     }
-    return Order.placeOrder(customerId, itemId, availableQty, qty, item.price);
-};
 
-export const getOrders = () => {
-    return Order.getOrders();
-};
+    const total = itemPrices[orderItemId] * orderQty;
+    addOrder(orderCustomerId, orderItemId, orderAvailableQty, orderQty, total);
+    document.getElementById('orderForm').reset();
+    loadOrderList(getOrders());
+    updateCounts();
+}
 
-export const deleteOrder = (orderId) => {
-    Order.deleteOrder(orderId);
-};
+export function deleteOrderHandler(orderId) {
+    deleteOrder(orderId);
+    loadOrderList(getOrders());
+    updateCounts();
+}
